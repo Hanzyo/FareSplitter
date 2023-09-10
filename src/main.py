@@ -1,9 +1,6 @@
 from GroceryParser import * 
 import os
 
-
-cur_dir = os.getcwd()
-csv_file = cur_dir + "/receipt.csv"
-parser = Parser(csv_file)
+parser = Parser()
 data = parser.parse()
-print(data)
+print("exit successful")
