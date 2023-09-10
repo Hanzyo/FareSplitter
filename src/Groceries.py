@@ -9,10 +9,10 @@ class Groceries:
         self.splitters = {}
     
     def update_splitter(self, name, portion):
-        self.splitters[name] = portion
+        self.splitters[name] = portion * self.total_price
         
     def print_info(self):
         print(f"Item {self.name} costs {self.total_price} and is splitted by ")
         for person in self.splitters:
-            print(f"{person}: ${self.splitters[person] * self.total_price}")
+            print(f"{person}: ${self.splitters[person]}")
         

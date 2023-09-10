@@ -1,5 +1,4 @@
 from GroceryParser import * 
-import os
 
 parser = Parser()
 data = parser.parse()

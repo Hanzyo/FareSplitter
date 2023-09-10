@@ -89,9 +89,10 @@ class Parser:
             
     def print_result(self):
         for i in range(self.num_orders):
-            print(f"For order #{i + 1}, the following people should pay {self.paid_person} this much:")
+            print(f"For order #{i + 1}, the following people should pay {self.paid_person[i]} this much:")
             for person, val in self.transaction[i].items():
-                print(f"{person}: ${val}")
+                if person != self.paid_person[i]:
+                    print(f"{person}: ${val}")
 
     def parse(self):
         self.init_process()
