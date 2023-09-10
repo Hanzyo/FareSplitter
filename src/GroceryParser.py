@@ -1,16 +1,18 @@
 
 from Groceries import *
 from People import *
-
+import numpy as np
 class Parser:
     def __init__(self) -> None:
         self.exit_flag = True
-        self.response = []
+        self.num_people = 0
         self.num_orders = 0
+        self.response = []
         self.orders = []
         self.paid_person = []
+        self.index = []
         self.tax_rate_dict = {}
-        self.transaction = []
+        self.people = {}
         
     def get_response(self):
         print("Press ENTER after typing:")
@@ -66,6 +68,10 @@ class Parser:
                     self.get_response()
                     if(self.response[0] == "Done"):
                         break
+                    if self.response[0] not in self.people:
+                        self.num_people += 1
+                        self.people[self.response[0]] = self.num_people - 1
+                        self.index.append(self.response[0])
                     item.update_splitter(self.response[0], float(self.response[1]))
                 item.print_info()
                 items.append(item)
@@ -73,27 +79,36 @@ class Parser:
             print("Enter the alias of person who paid this order")
             self.get_response()
             self.paid_person.append(self.response[0])
+            if self.response[0] not in self.people:
+                self.num_people += 1
+                self.people[self.response[0]] = self.num_people - 1
+                self.index.append(self.response[0])
             self.orders.append(items)
                 
     def calculate(self):
+        transactions = np.zeros((self.num_people, self.num_people))
         for i in range(self.num_orders):
-            should_pay = {}
             items = self.orders[i]
             for item in items:
                 for splitter, val in item.splitters.items():
-                    if splitter not in should_pay:
-                        should_pay[splitter] = val
+                    from_id = self.people[splitter]
+                    to_id = self.people[self.paid_person[i]]
+                    transactions[from_id][to_id] += val
+        for i in range(self.num_people):
+            for j in range(self.num_people):
+                if transactions[i][j] != 0 and transactions[j][i] != 0:
+                    if transactions[i][j] >= transactions[j][i]:
+                        transactions[i][j] -= transactions[j][i]
+                        transactions[j][i] = 0
                     else:
-                        should_pay[splitter] += val
-            self.transaction.append(should_pay)
-            
-    def print_result(self):
-        for i in range(self.num_orders):
-            print(f"For order #{i + 1}, the following people should pay {self.paid_person[i]} this much:")
-            for person, val in self.transaction[i].items():
-                if person != self.paid_person[i]:
-                    print(f"{person}: ${val}")
-
+                        transactions[j][i] -= transactions[i][j]
+                        transactions[i][j] = 0
+        with open("output.txt", 'w') as file:
+            for i in range(self.num_people):
+                for j in range(self.num_people):
+                    if transactions[i][j] != 0:
+                        file.write(f"{self.index[i]} needs to pay {self.index[j]}: ${transactions[i][j]}\n")
+        
     def parse(self):
         self.init_process()
         if(not self.exit_flag):
@@ -102,4 +117,6 @@ class Parser:
         if(not self.exit_flag):
             return
         self.calculate()
-        self.print_result()
+        if(not self.exit_flag):
+            return
+        print("Calculation completed, see outputs in output.txt")
